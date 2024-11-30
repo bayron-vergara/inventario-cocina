@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario de Cocina</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #121212; /* Fondo negro */
+      color: #f5f5f5; /* Texto claro */
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffcc00; /* Amarillo para destacar */
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    li {
+      padding: 10px 15px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      margin: 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #1e1e1e; /* Gris oscuro */
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    li.checked {
+      background-color: #004d40; /* Verde oscuro */
+      box-shadow: 0 0 10px #1de9b6; /* Resaltado verde */
+      color: #e0f7fa; /* Texto más claro */
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .quantity-controls button {
+      background-color: #1976d2; /* Azul */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .quantity-controls button:hover {
+      background-color: #0d47a1; /* Azul más oscuro */
+    }
+
+    .quantity-controls input {
+      width: 40px;
+      text-align: center;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background-color: #333; /* Fondo oscuro */
+      color: #f5f5f5;
+    }
+
+    #inventoryControls {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+
+    #newItem {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      font-size: 1rem;
+      background-color: #1e1e1e; /* Fondo oscuro */
+      color: #f5f5f5;
+    }
+
+    #addButton {
+      padding: 10px 20px;
+      background-color: #28a745; /* Verde */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #addButton:hover {
+      background-color: #1b5e20; /* Verde más oscuro */
+    }
+
+    #shareButton {
+      margin-top: 20px;
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #1976d2; /* Azul */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #shareButton:hover {
+      background-color: #0d47a1; /* Azul más oscuro */
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Inventario de Cocina</h1>
+
+  <ul id="inventory">
+    <li>
+      Harina 
+      <div class="quantity-controls">
+        <button onclick="updateQuantity(this, -1)">−</button>
+        <input type="number" value="1" min="0" readonly>
+        <button onclick="updateQuantity(this, 1)">+</button>
+      </div>
+      <button onclick="removeItem(this)">×</button>
+    </li>
+    <li>
+      Azúcar 
+      <div class="quantity-controls">
+        <button onclick="updateQuantity(this, -1)">−</button>
+        <input type="number" value="1" min="0" readonly>
+        <button onclick="updateQuantity(this, 1)">+</button>
+      </div>
+      <button onclick="removeItem(this)">×</button>
+    </li>
+  </ul>
+
+  <div id="inventoryControls">
+    <input type="text" id="newItem" placeholder="Agregar nuevo ingrediente...">
+    <button id="addButton">Agregar</button>
+  </div>
+
+  <button id="shareButton">Compartir lista</button>
+
+  <footer>© 2024 Inventario de Cocina - Todos los derechos reservados.</footer>
+
+  <script>
+    const inventory = document.getElementById('inventory');
+    const newItemInput = document.getElementById('newItem');
+    const addButton = document.getElementById('addButton');
+    const shareButton = document.getElementById('shareButton');
+
+    // Agregar un nuevo elemento
+    addButton.addEventListener('click', () => {
+      const newItem = newItemInput.value.trim();
+      if (newItem) {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          ${newItem}
+          <div class="quantity-controls">
+            <button onclick="updateQuantity(this, -1)">−</button>
+            <input type="number" value="1" min="0" readonly>
+            <button onclick="updateQuantity(this, 1)">+</button>
+          </div>
+          <button onclick="removeItem(this)">×</button>
+        `;
+        inventory.appendChild(li);
+        highlightItem(li);
+        newItemInput.value = '';
+        newItemInput.focus();
+      }
+    });
+
+    // Eliminar un elemento
+    function removeItem(button) {
+      button.parentElement.remove();
+    }
+
+    // Actualizar cantidad del producto
+    function updateQuantity(button, change) {
+      const input = button.parentElement.querySelector('input');
+      const li = button.closest('li');
+      const currentValue = parseInt(input.value);
+      const newValue = Math.max(0, currentValue + change);
+      input.value = newValue;
+      highlightItem(li);
+    }
+
+    // Resaltar los ítems con cantidad mayor a 0
+    function highlightItem(li) {
+      const input = li.querySelector('input');
+      if (parseInt(input.value) > 0) {
+        li.classList.add('checked');
+      } else {
+        li.classList.remove('checked');
+      }
+    }
+
+    // Compartir la lista
+    shareButton.addEventListener('click', () => {
+      const items = Array.from(inventory.children).map(li => {
+        const name = li.firstChild.textContent.trim();
+        const quantity = li.querySelector('input').value;
+        return `${name} (Cantidad: ${quantity})`;
+      }).join(', ');
+      if (navigator.share) {
+        navigator.share({
+          title: 'Mi Inventario de Cocina',
+          text: `Estos son mis ingredientes: ${items}`,
+        }).catch(console.error);
+      } else {
+        alert(`Estos son mis ingredientes: ${items}`);
+      }
+    });
+
+    // Resaltar los ítems iniciales
+    document.querySelectorAll('#inventory li').forEach(highlightItem);
+  </script>
+</body>
+</html>
